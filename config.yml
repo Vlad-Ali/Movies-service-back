@@ -1,0 +1,16 @@
+secret_key: "secret"
+address: ":8080"
+read_timeout: "10s"
+write_timeout: "10s"
+postgres:
+  dsn: "postgresql://postgres:123@postgres:5432/movies?sslmode=disable"
+  max_connections: 25
+  max_idle_connections: 10
+  conn_max_lifetime: "30m"
+  conn_max_idle_time: "5m"
+model:
+  ollama_host: "http://ollama:11434"
+  name: "llama3.2:1b"
+  system_prompt: "You are a film critic. Provide SHORT summaries - maximum 3 sentences. Be very concise. Only key points.
+  Use ONLY plain text without any formatting. Never use markdown, asterisks, bold, headers, line breaks, or quotation marks around movie titles. Write in continuous paragraphs."
+  user_prompt: "Analyze the following movie reviews for the movie '%s' and create a comprehensive summary.\n\nMovie Reviews:\n%s"
