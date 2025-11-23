@@ -98,7 +98,7 @@ func (u *UserService) Authenticate(ctx context.Context, data object.Authenticati
 			return &object.AuthResponse{}, err
 		}
 		slog.Debug("user is authenticated", "ID", user.ID().ID())
-		return &object.AuthResponse{Username: user.Username(), Token: token}, nil
+		return &object.AuthResponse{Username: user.Username(), Token: token, Email: user.Email()}, nil
 	})
 
 }

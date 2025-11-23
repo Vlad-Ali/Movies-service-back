@@ -101,7 +101,7 @@ func (u *UserHandler) Authenticate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := userresponse.UserAuthResponse{Token: authResp.Token, Username: authResp.Username}
+	response := userresponse.UserAuthResponse{Token: authResp.Token, Username: authResp.Username, Email: authResp.Email}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(response)
