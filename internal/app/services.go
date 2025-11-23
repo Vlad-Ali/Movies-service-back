@@ -13,6 +13,7 @@ import (
 	"github.com/Vlad-Ali/Movies-service-back/internal/domain/movie"
 	reviewdomain "github.com/Vlad-Ali/Movies-service-back/internal/domain/review"
 	userdomain "github.com/Vlad-Ali/Movies-service-back/internal/domain/user"
+	"github.com/Vlad-Ali/Movies-service-back/internal/domain/user/object"
 	"github.com/Vlad-Ali/Movies-service-back/internal/domain/usermovie"
 )
 
@@ -28,7 +29,7 @@ type Services struct {
 func NewServices(db *sql.DB, repos *Repositories, secretKey string, transactionUser transactionmanager.TransactionUser, config modelconfig.ModelConfig) *Services {
 	tokenService := jwt.NewJwtService(secretKey)
 	userService := user.NewUserService(tokenService, repos.UserRepository, transactionmanager.NewTransactionManager[*userdomain.User](db),
-		transactionmanager.NewTransactionManager[string](db))
+		transactionmanager.NewTransactionManager[*object.AuthResponse](db))
 	movieService := movie2.NewMovieService(repos.MovieRepository, transactionmanager.NewTransactionManager[*movie.Movie](db),
 		transactionmanager.NewTransactionManager[[]*movie.Movie](db))
 	userMovieService := usermovie2.NewUserMovieService(repos.MovieRepository, repos.UserMovieRepository,

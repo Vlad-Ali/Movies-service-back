@@ -13,6 +13,11 @@ services:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - movies-network
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "3"
   movies-app:
     image: movies-app:1.0.0
     container_name: movies-app-container
@@ -29,6 +34,11 @@ services:
       - movies-network
 
     command: ["./app"]
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   ollama:
     image: ollama/ollama:0.6.8
@@ -40,6 +50,11 @@ services:
       - ollama-data:/root/.ollama
     networks:
       - movies-network
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 
 volumes:

@@ -9,5 +9,5 @@ import (
 type Service interface {
 	GetUserByID(ctx context.Context, id object.UserID) (*User, error)
 	Register(ctx context.Context, data object.UserRegistrationData) (*User, error)
-	Authenticate(ctx context.Context, data object.AuthenticationData) (string, error)
+	Authenticate(ctx context.Context, data object.AuthenticationData) (*object.AuthResponse, error)
 }

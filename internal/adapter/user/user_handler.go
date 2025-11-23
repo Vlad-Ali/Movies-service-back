@@ -88,7 +88,7 @@ func (u *UserHandler) Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authData := object.NewAuthenticationData(authRequest.Password, authRequest.Email)
-	token, err := u.userService.Authenticate(r.Context(), authData)
+	authResp, err := u.userService.Authenticate(r.Context(), authData)
 	if err != nil {
 		slog.Error("Error authenticating user", "error", err)
 		if errors.Is(err, usererror.ErrUserPasswordValidationFailed) || errors.Is(err, usererror.ErrUserEmailValidationFailed) {
@@ -101,7 +101,7 @@ func (u *UserHandler) Authenticate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := userresponse.UserAuthResponse{Token: token}
+	response := userresponse.UserAuthResponse{Token: authResp.Token, Username: authResp.Username}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(response)

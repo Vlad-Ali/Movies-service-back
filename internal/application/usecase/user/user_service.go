@@ -17,10 +17,10 @@ type UserService struct {
 	tokenService   userdomain.TokenService
 	userRepo       userdomain.Repository
 	userTxManager  transactionmanager.TransactionManager[*userdomain.User]
-	tokenTxManager transactionmanager.TransactionManager[string]
+	tokenTxManager transactionmanager.TransactionManager[*object.AuthResponse]
 }
 
-func NewUserService(tokenService userdomain.TokenService, userRepo userdomain.Repository, manager transactionmanager.TransactionManager[*userdomain.User], tokenTxManager transactionmanager.TransactionManager[string]) *UserService {
+func NewUserService(tokenService userdomain.TokenService, userRepo userdomain.Repository, manager transactionmanager.TransactionManager[*userdomain.User], tokenTxManager transactionmanager.TransactionManager[*object.AuthResponse]) *UserService {
 	return &UserService{tokenService: tokenService, userRepo: userRepo, userTxManager: manager, tokenTxManager: tokenTxManager}
 }
 
@@ -72,33 +72,33 @@ func (u *UserService) Register(ctx context.Context, data object.UserRegistration
 	})
 }
 
-func (u *UserService) Authenticate(ctx context.Context, data object.AuthenticationData) (string, error) {
-	return u.tokenTxManager.InTransaction(ctx, func(ctx context.Context) (string, error) {
+func (u *UserService) Authenticate(ctx context.Context, data object.AuthenticationData) (*object.AuthResponse, error) {
+	return u.tokenTxManager.InTransaction(ctx, func(ctx context.Context) (*object.AuthResponse, error) {
 		err := uservalidation.ValidateAuthenticationData(data)
 		if err != nil {
 			slog.Error("Validation failed", "error", err)
-			return "", err
+			return &object.AuthResponse{}, err
 		}
 
 		user, err := u.userRepo.GetByEmail(ctx, data.Email())
 		if err != nil {
 			slog.Error("failed to auth user error", "error", err)
-			return "", err
+			return &object.AuthResponse{}, err
 		}
 
 		ok := hasher.VerifyPassword(data.Password(), user.Password())
 		if !ok {
 			slog.Error("failed to auth user")
-			return "", usererror.ErrInvalidPassword
+			return &object.AuthResponse{}, usererror.ErrInvalidPassword
 		}
 
 		token, err := u.tokenService.GenerateToken(ctx, user)
 		if err != nil {
 			slog.Error("failed to generate token error", "error", err)
-			return "", err
+			return &object.AuthResponse{}, err
 		}
 		slog.Debug("user is authenticated", "ID", user.ID().ID())
-		return token, nil
+		return &object.AuthResponse{Username: user.Username(), Token: token}, nil
 	})
 
 }
