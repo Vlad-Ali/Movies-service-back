@@ -15,6 +15,7 @@ type Config struct {
 	Address        string                        `yaml:"address"`
 	ReadTimeout    time.Duration                 `yaml:"read_timeout"`
 	WriteTimeout   time.Duration                 `yaml:"write_timeout"`
+	AllowedOrigins []string                      `yaml:"allowed_origins"`
 	PostgresConfig postgresconfig.PostgresConfig `yaml:"postgres"`
 	ModelConfig    modelconfig.ModelConfig       `yaml:"model"`
 }

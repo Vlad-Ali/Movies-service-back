@@ -63,7 +63,7 @@ func NewApp() (*App, error) {
 	repos := NewRepositories(db)
 	services := NewServices(db, repos, cfg.SecretKey, txUser, cfg.ModelConfig)
 	handlers := NewHandlers(services)
-	handler := handlers.registerRoutes()
+	handler := handlers.registerRoutes(cfg)
 
 	slog.Info("Successfully connected to PostgreSQL")
 	return &App{db: db, config: cfg, handlers: handlers, services: services,

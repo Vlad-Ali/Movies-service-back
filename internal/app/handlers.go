@@ -8,6 +8,7 @@ import (
 	"github.com/Vlad-Ali/Movies-service-back/internal/adapter/review"
 	"github.com/Vlad-Ali/Movies-service-back/internal/adapter/user"
 	"github.com/Vlad-Ali/Movies-service-back/internal/adapter/usermovie"
+	"github.com/rs/cors"
 )
 
 type Handlers struct {
@@ -28,7 +29,7 @@ func NewHandlers(services *Services) *Handlers {
 		ReviewHandler: reviewHandler}
 }
 
-func (h *Handlers) registerRoutes() http.Handler {
+func (h *Handlers) registerRoutes(cfg *Config) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /api/user/register", h.UserHandler.Register)
@@ -51,5 +52,11 @@ func (h *Handlers) registerRoutes() http.Handler {
 
 	mainHandler := h.AuthHandler.Authorize(mux)
 
-	return mainHandler
+	c := cors.New(cors.Options{
+		AllowedOrigins:   cfg.AllowedOrigins,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+	return c.Handler(mainHandler)
 }
