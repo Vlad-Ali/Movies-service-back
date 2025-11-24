@@ -11,6 +11,7 @@ import (
 	"github.com/Vlad-Ali/Movies-service-back/internal/adapter/usermovie/request"
 	response2 "github.com/Vlad-Ali/Movies-service-back/internal/adapter/usermovie/response"
 	error2 "github.com/Vlad-Ali/Movies-service-back/internal/domain/movie/error"
+	"github.com/Vlad-Ali/Movies-service-back/internal/domain/movie/object"
 	"github.com/Vlad-Ali/Movies-service-back/internal/domain/usermovie"
 	error3 "github.com/Vlad-Ali/Movies-service-back/internal/domain/usermovie/error"
 )
@@ -133,23 +134,16 @@ func (u *UserMovieHandler) GetUserMovie(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	body, err := io.ReadAll(r.Body)
+	movieInfo, err := object.GetMovieInfoFromReq(r)
+
 	if err != nil {
-		slog.Error("UserMovieHandler.GetUserMovie Error reading body: ", "Error", err)
-		http.Error(w, "Failed to get user movie", http.StatusInternalServerError)
+		slog.Error("UserMovieHandler.GetUserMovie Error getting parameters: ", "Error", err)
+		http.Error(w, "Invalid parameters", http.StatusBadRequest)
 		return
 	}
 
-	defer r.Body.Close()
-	var userMovieRequest request.UserMovieWithListTypeRequest
-	err = json.Unmarshal(body, &userMovieRequest)
-	if err != nil {
-		slog.Error("UserMovieHandler.GetUserMovie Error unmarshalling body: ", "Error", err)
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-
-	movie, err := u.userMovieService.FindMovieByUser(r.Context(), userID, userMovieRequest.MovieInfo, userMovieRequest.ListType)
+	listType := r.URL.Query().Get("listType")
+	movie, err := u.userMovieService.FindMovieByUser(r.Context(), userID, movieInfo, listType)
 	if err != nil {
 		slog.Error("UserMovieHandler.GetUserMovie  Error finding movie: ", "Error", err)
 		if errors.Is(err, error2.ErrMovieIsNotFound) {
@@ -183,24 +177,9 @@ func (u *UserMovieHandler) GetUserMovies(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		slog.Error("UserMovieHandler.GetUserMovies Error reading body: ", "Error", err)
-		http.Error(w, "Failed to get user movie", http.StatusInternalServerError)
-		return
-	}
-
-	defer r.Body.Close()
-
-	var userMoviesRequest request.UserMoviesRequest
-	err = json.Unmarshal(body, &userMoviesRequest)
-	if err != nil {
-		slog.Error("UserMovieHandler.GetUserMovies Error unmarshalling body: ", "Error", err)
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-
-	movies, err := u.userMovieService.FindMoviesByUserAndListType(r.Context(), userID, userMoviesRequest.ListType)
+	listType := r.URL.Query().Get("listType")
+	slog.Debug("Got list type", "listType", listType)
+	movies, err := u.userMovieService.FindMoviesByUserAndListType(r.Context(), userID, listType)
 	if err != nil {
 		slog.Error("UserMovieHandler.GetUserMovies  Error finding movies: ", "Error", err)
 		if errors.Is(err, error3.ErrListTypeIsIncorrect) {

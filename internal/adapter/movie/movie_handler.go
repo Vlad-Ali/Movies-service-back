@@ -3,7 +3,6 @@ package movie
 import (
 	"encoding/json"
 	"errors"
-	"io"
 	"log/slog"
 	"net/http"
 
@@ -23,18 +22,11 @@ func NewMovieHandler(movieService moviedomain.Service) *MovieHandler {
 
 func (m *MovieHandler) GetMovie(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("MovieHandler.GetMovie called")
-	body, err := io.ReadAll(r.Body)
+
+	movieInfo, err := object.GetMovieInfoFromReq(r)
 	if err != nil {
-		slog.Error("MovieHandler.GetMovie error reading Body", slog.String("err", err.Error()))
-		http.Error(w, "Failed to get movie", http.StatusInternalServerError)
-		return
-	}
-	defer r.Body.Close()
-	var movieInfo object.MovieInfo
-	err = json.Unmarshal(body, &movieInfo)
-	if err != nil {
-		slog.Error("MovieHandler.GetMovie error unmarshalling body", slog.String("err", err.Error()))
-		http.Error(w, "Invalid JSON", http.StatusInternalServerError)
+		slog.Error("MovieHandler.GetMovie error getting parameters", slog.String("err", err.Error()))
+		http.Error(w, "Invalid parameters", http.StatusBadRequest)
 		return
 	}
 

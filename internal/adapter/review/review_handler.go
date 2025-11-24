@@ -132,19 +132,10 @@ func (rh *ReviewHandler) GetReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := io.ReadAll(r.Body)
+	movieInfo, err := object.GetMovieInfoFromReq(r)
 	if err != nil {
-		slog.Error("Error while reading body", "error", err)
-		http.Error(w, "Failed to get review", http.StatusInternalServerError)
-		return
-	}
-
-	defer r.Body.Close()
-	var movieInfo object.MovieInfo
-	err = json.Unmarshal(body, &movieInfo)
-	if err != nil {
-		slog.Error("Error while unmarshalling body", "error", err)
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		slog.Error("Error while getting parameters", "error", err)
+		http.Error(w, "Invalid parameters", http.StatusBadRequest)
 		return
 	}
 
@@ -171,19 +162,11 @@ func (rh *ReviewHandler) GetReview(w http.ResponseWriter, r *http.Request) {
 
 func (rh *ReviewHandler) GetReviews(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("ReviewHandler.GetReviews called")
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		slog.Error("Error while reading body", "error", err)
-		http.Error(w, "Failed to get reviews", http.StatusInternalServerError)
-		return
-	}
 
-	defer r.Body.Close()
-	var movieInfo object.MovieInfo
-	err = json.Unmarshal(body, &movieInfo)
+	movieInfo, err := object.GetMovieInfoFromReq(r)
 	if err != nil {
-		slog.Error("Error while unmarshalling body", "error", err)
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		slog.Error("Error while getting parameters", "error", err)
+		http.Error(w, "Invalid parameters", http.StatusBadRequest)
 		return
 	}
 
@@ -211,19 +194,10 @@ func (rh *ReviewHandler) GetReviews(w http.ResponseWriter, r *http.Request) {
 func (rh *ReviewHandler) GetSummaryReviews(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("ReviewHandler.GetSummaryReviews called")
 
-	body, err := io.ReadAll(r.Body)
+	movieInfo, err := object.GetMovieInfoFromReq(r)
 	if err != nil {
-		slog.Error("Error while reading body", "error", err)
-		http.Error(w, "Failed to get reviews", http.StatusInternalServerError)
-		return
-	}
-
-	defer r.Body.Close()
-	var movieInfo object.MovieInfo
-	err = json.Unmarshal(body, &movieInfo)
-	if err != nil {
-		slog.Error("Error while unmarshalling body", "error", err)
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		slog.Error("Error while getting parameters", "error", err)
+		http.Error(w, "Invalid parameters", http.StatusBadRequest)
 		return
 	}
 
