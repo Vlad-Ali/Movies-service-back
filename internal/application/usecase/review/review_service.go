@@ -105,7 +105,7 @@ func (r *ReviewService) GetUserReview(ctx context.Context, userID object.UserID,
 	})
 }
 
-func (r *ReviewService) GetUserReviews(ctx context.Context, info object2.MovieInfo) ([]*reviewdomain.ReviewInfo, error) {
+func (r *ReviewService) GetReviewsByMovie(ctx context.Context, info object2.MovieInfo) ([]*reviewdomain.ReviewInfo, error) {
 	return r.reviewsTxManager.InTransaction(ctx, func(ctx context.Context) ([]*reviewdomain.ReviewInfo, error) {
 		movieID, err := r.movieRepo.GetIDByReleaseDateAndTitle(ctx, info.Title, info.Year, info.Month, info.Day)
 		if err != nil {
@@ -114,6 +114,24 @@ func (r *ReviewService) GetUserReviews(ctx context.Context, info object2.MovieIn
 		}
 
 		reviews, err := r.reviewRepo.GetReviewsByMovie(ctx, movieID)
+		if err != nil {
+			slog.Error("ReviewSrv.GetUserReviews Error while getting reviews", "error", err)
+			return nil, err
+		}
+
+		return reviews, nil
+	})
+}
+
+func (r *ReviewService) GetReviewsByMovieForUser(ctx context.Context, info object2.MovieInfo, userID object.UserID) ([]*reviewdomain.ReviewInfo, error) {
+	return r.reviewsTxManager.InTransaction(ctx, func(ctx context.Context) ([]*reviewdomain.ReviewInfo, error) {
+		movieID, err := r.movieRepo.GetIDByReleaseDateAndTitle(ctx, info.Title, info.Year, info.Month, info.Day)
+		if err != nil {
+			slog.Error("ReviewSrv.GetUserReviews Error while getting movie", "error", err)
+			return nil, err
+		}
+
+		reviews, err := r.reviewRepo.GetReviewByMovieForUser(ctx, movieID, userID)
 		if err != nil {
 			slog.Error("ReviewSrv.GetUserReviews Error while getting reviews", "error", err)
 			return nil, err

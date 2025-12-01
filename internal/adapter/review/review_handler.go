@@ -150,7 +150,7 @@ func (rh *ReviewHandler) GetReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reviewResponse := response.GetReviewResponse{Text: review.Text(), ReviewYear: review.WritingDate().Year(), ReviewMonth: int(review.WritingDate().Month()), ReviewDay: review.WritingDate().Day()}
+	reviewResponse := response.GetReviewResponse{ID: review.ID().ID(), Text: review.Text(), ReviewYear: review.WritingDate().Year(), ReviewMonth: int(review.WritingDate().Month()), ReviewDay: review.WritingDate().Day()}
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(reviewResponse)
@@ -170,7 +170,43 @@ func (rh *ReviewHandler) GetReviews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reviews, err := rh.reviewService.GetUserReviews(r.Context(), movieInfo)
+	reviews, err := rh.reviewService.GetReviewsByMovie(r.Context(), movieInfo)
+	if err != nil {
+		slog.Error("Error while getting reviews", "error", err)
+		if errors.Is(err, error2.ErrMovieIsNotFound) {
+			http.Error(w, "Movie is not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Failed to get reviews", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	getResponse := response.GetReviewsResponse{Reviews: reviews}
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(getResponse)
+	if err != nil {
+		slog.Error("Error while writing body", "error", err)
+		return
+	}
+}
+
+func (rh *ReviewHandler) GetReviewsForUser(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("ReviewHandler.GetReviewsForUser called")
+
+	userID, err := useridkey.ExtractUserIdFromReq(r)
+	if err != nil {
+		slog.Error("Error while extracting user id from request", "error", err)
+		http.Error(w, "Failed to delete review", http.StatusUnauthorized)
+	}
+
+	movieInfo, err := object.GetMovieInfoFromReq(r)
+	if err != nil {
+		slog.Error("Error while getting parameters", "error", err)
+		http.Error(w, "Invalid parameters", http.StatusBadRequest)
+	}
+
+	reviews, err := rh.reviewService.GetReviewsByMovieForUser(r.Context(), movieInfo, userID)
 	if err != nil {
 		slog.Error("Error while getting reviews", "error", err)
 		if errors.Is(err, error2.ErrMovieIsNotFound) {

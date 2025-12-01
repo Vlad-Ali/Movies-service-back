@@ -1,7 +1,7 @@
 secret_key: "secret"
 address: ":8080"
 read_timeout: "10s"
-write_timeout: "10s"
+write_timeout: "20s"
 allowed_origins: ["http://localhost:3000"]
 postgres:
   dsn: "postgresql://postgres:123@postgres:5432/movies?sslmode=disable"

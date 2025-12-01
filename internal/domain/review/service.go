@@ -12,5 +12,6 @@ type Service interface {
 	SaveReview(ctx context.Context, userID object.UserID, movieInfo object2.MovieInfo, text string, writingDate time.Time) error
 	DeleteReview(ctx context.Context, userID object.UserID, info object2.MovieInfo) error
 	GetUserReview(ctx context.Context, userID object.UserID, info object2.MovieInfo) (*Review, error)
-	GetUserReviews(ctx context.Context, info object2.MovieInfo) ([]*ReviewInfo, error)
+	GetReviewsByMovie(ctx context.Context, info object2.MovieInfo) ([]*ReviewInfo, error)
+	GetReviewsByMovieForUser(ctx context.Context, info object2.MovieInfo, userID object.UserID) ([]*ReviewInfo, error)
 }

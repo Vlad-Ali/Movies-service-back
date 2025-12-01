@@ -35,7 +35,7 @@ func NewReviewProvider(reviewService reviewdomain.Service, config modelconfig.Mo
 }
 
 func (r *ReviewProvider) ProvideMovieReviews(ctx context.Context, movieInfo object2.MovieInfo) (string, error) {
-	reviews, err := r.reviewService.GetUserReviews(ctx, movieInfo)
+	reviews, err := r.reviewService.GetReviewsByMovie(ctx, movieInfo)
 
 	if err != nil {
 		return "", err

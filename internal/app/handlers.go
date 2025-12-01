@@ -6,17 +6,19 @@ import (
 	"github.com/Vlad-Ali/Movies-service-back/internal/adapter/middleware"
 	"github.com/Vlad-Ali/Movies-service-back/internal/adapter/movie"
 	"github.com/Vlad-Ali/Movies-service-back/internal/adapter/review"
+	"github.com/Vlad-Ali/Movies-service-back/internal/adapter/reviewlike"
 	"github.com/Vlad-Ali/Movies-service-back/internal/adapter/user"
 	"github.com/Vlad-Ali/Movies-service-back/internal/adapter/usermovie"
 	"github.com/rs/cors"
 )
 
 type Handlers struct {
-	UserHandler      *user.UserHandler
-	MovieHandler     *movie.MovieHandler
-	UserMovieHandler *usermovie.UserMovieHandler
-	AuthHandler      *middleware.AuthMiddleware
-	ReviewHandler    *review.ReviewHandler
+	UserHandler       *user.UserHandler
+	MovieHandler      *movie.MovieHandler
+	UserMovieHandler  *usermovie.UserMovieHandler
+	AuthHandler       *middleware.AuthMiddleware
+	ReviewHandler     *review.ReviewHandler
+	ReviewLikeHandler *reviewlike.ReviewLikeHandler
 }
 
 func NewHandlers(services *Services) *Handlers {
@@ -25,8 +27,9 @@ func NewHandlers(services *Services) *Handlers {
 	userMovieHandler := usermovie.NewUserMovieHandler(services.UserMovieService)
 	tokenHandler := middleware.NewAuthMiddleware(services.TokenService)
 	reviewHandler := review.NewReviewHandler(services.ReviewService, services.ReviewProvider)
+	reviewLikeHandler := reviewlike.NewReviewLikeHandler(services.ReviewLikeService)
 	return &Handlers{UserHandler: userHandler, MovieHandler: movieHandler, UserMovieHandler: userMovieHandler, AuthHandler: tokenHandler,
-		ReviewHandler: reviewHandler}
+		ReviewHandler: reviewHandler, ReviewLikeHandler: reviewLikeHandler}
 }
 
 func (h *Handlers) registerRoutes(cfg *Config) http.Handler {
@@ -48,13 +51,17 @@ func (h *Handlers) registerRoutes(cfg *Config) http.Handler {
 	mux.HandleFunc("DELETE /api/user/movie/review", h.ReviewHandler.DeleteReview)
 	mux.HandleFunc("GET /api/user/movie/review", h.ReviewHandler.GetReview)
 	mux.HandleFunc("GET /api/movie/review/all", h.ReviewHandler.GetReviews)
+	mux.HandleFunc("GET /api/movie/review/user/all", h.ReviewHandler.GetReviewsForUser)
 	mux.HandleFunc("GET /api/movie/summary", h.ReviewHandler.GetSummaryReviews)
+
+	mux.HandleFunc("POST /api/movie/review/like", h.ReviewLikeHandler.Like)
+	mux.HandleFunc("POST /api/movie/review/unlike", h.ReviewLikeHandler.UnLike)
 
 	mainHandler := h.AuthHandler.Authorize(mux)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   cfg.AllowedOrigins,
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
 	})
