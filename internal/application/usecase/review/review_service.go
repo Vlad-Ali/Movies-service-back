@@ -94,11 +94,9 @@ func (r *ReviewService) GetUserReview(ctx context.Context, userID object.UserID,
 		}
 
 		review, err := r.reviewRepo.GetReviewByUserAndMovie(ctx, userID, movieID)
-		if err != nil && !errors.Is(err, error2.ErrReviewNotFound) {
+		if err != nil {
 			slog.Error("ReviewSrv.GetUserReview Error while getting review", "error", err)
 			return nil, err
-		} else if errors.Is(err, error2.ErrReviewNotFound) {
-			return &reviewdomain.Review{}, nil
 		}
 
 		return review, nil

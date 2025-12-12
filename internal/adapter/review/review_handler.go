@@ -144,6 +144,8 @@ func (rh *ReviewHandler) GetReview(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Error while getting review", "error", err)
 		if errors.Is(err, error2.ErrMovieIsNotFound) {
 			http.Error(w, "Movie is not found", http.StatusNotFound)
+		} else if errors.Is(err, error3.ErrReviewNotFound) {
+			http.Error(w, "Review is not found", http.StatusNotFound)
 		} else {
 			http.Error(w, "Failed to get review", http.StatusInternalServerError)
 		}
