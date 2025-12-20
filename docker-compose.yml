@@ -18,8 +18,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-  movies-app:
-    image: movies-app:1.0.0
+  movies-app-container:
+    image: vladali/movies-app:1.0.0
     container_name: movies-app-container
     restart: unless-stopped
     ports:
